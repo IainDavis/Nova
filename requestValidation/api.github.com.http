@@ -1,0 +1,23 @@
+@repo-owner = IainDavis
+@repo-name = iaindavis.github.io
+
+@base = main
+@head = _config
+
+# tokens are stored in settings file external to the repository. To
+# make these work, you will have to supply your own tokens.
+
+### @name list-PRs
+GET api.github.com/repos/{{repo-owner}}/{{repo-name}}/pulls
+    ?q=repo:IainDavis/iaindavis.github.io is:pr
+Authorization: token {{nova_token_github}}
+X-GitHub-Api-Version: 2022-11-28
+
+### @name compare-refs
+GET api.github.com/repos/{{repo-owner}}/{{repo-name}}/compare/{{base}}...{{head}}
+Authorization: token {{nova_token_github}}
+X-GitHub-Api-Version: 2022-11-28
+
+# Note: I've excluded POST operations from this test file. I have
+# confidence they work, and I don't want to pollute my repo with a lot
+# of test artifacts
