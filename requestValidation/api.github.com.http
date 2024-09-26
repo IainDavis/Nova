@@ -19,5 +19,5 @@ Authorization: token {{nova_token_github}}
 X-GitHub-Api-Version: 2022-11-28
 
 # Note: I've excluded POST operations from this test file. I have
-# confidence they work, and I don't want to pollute my repo with a lot
+# confidence they work (except creating pull requests, at present), and I don't want to pollute my repo with a lot
 # of test artifacts
