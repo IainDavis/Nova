@@ -1,0 +1,55 @@
+@cloud-id = fe060eb3-d7d5-474f-9abe-99abcbf45235
+
+### @name list-issues
+
+### Get Open Issues from Jira project IDAVIS
+GET https://iaindavis-dev.atlassian.net/rest/api/3/search?fields=summary
+Authorization: Basic {{nova_token_jira}}
+Content-Type: application/json
+
+### @name list-projects
+GET https://iaindavis-dev.atlassian.net/rest/api/3/project/search
+Authorization: Basic {{nova_token_jira}}
+Accept: application/json
+
+### test
+
+POST https://iaindavis-dev.atlassian.net/rest/api/3/issue
+Content-Type: application/json
+Authorization: Basic {{nova_token_jira}}
+
+{
+  "fields": {
+    "project": {
+      "key": "IDAVIS"
+    },
+    "summary": "Test issue: Review test environment setup",
+    "description": {
+      "version": 1,
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "This is a test issue created to review the setup and configuration of the testing environment."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Ensure that all dependencies are correctly installed, and the test suite runs as expected across all modules."
+            }
+          ]
+        }
+      ]
+    },
+    "issuetype": {
+      "name": "Task"
+    }
+  }
+}
