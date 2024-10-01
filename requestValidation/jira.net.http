@@ -1,7 +1,7 @@
-@cloud-id = fe060eb3-d7d5-474f-9abe-99abcbf45235
+# tokens are stored in settings file external to the repository. To
+# make these work, you will have to supply your own tokens.
 
 ### @name list-issues
-
 ### Get Open Issues from Jira project IDAVIS
 GET https://iaindavis-dev.atlassian.net/rest/api/3/search?fields=summary
 Authorization: Basic {{nova_token_jira}}
