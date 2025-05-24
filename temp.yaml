@@ -1,0 +1,17 @@
+default: 
+  - refactor:
+    description: Refactor code without changing functionality
+  - feature:
+    description: Add new features or functionality
+  - test:
+    description: Add or update tests
+  - stories:
+    description: Add or update Storybook stories
+  - fix:
+    description: Fix bugs or issues
+  - config:
+    description: Update configuration files
+  - documentation:
+    description: Update documentation
+  - exploration:
+    description: Explore new ideas or concepts -- may or may not produce usable work artifacts

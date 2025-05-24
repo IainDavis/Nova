@@ -4,7 +4,7 @@ info:
   description: API for interacting with Jira issues and sub-tasks.
   version: 1.0.0
 servers:
-  - url: https://api.atlassian.com/ex/jira/fe060eb3-d7d5-474f-9abe-99abcbf45235/rest/api/3
+  - url: https://api.atlassian.com/ex/jira/ced0a132-675b-46cc-b92a-3e67e8ac26d6/rest/api
     description: Jira Cloud API
 components:
   securitySchemes:
@@ -18,6 +18,20 @@ components:
             read:jira-user: Read Jira user information
             read:jira-work: Read Jira work data
             write:jira-work: Write Jira work data
+            # read:jira-project: Read Jira project information
+            # read:jira-field: Read Jira field information
+            read:project:jira: Read Jira project information
+            read:field:jira: Read Jira field information
+            read:field-configuration:jira: Read field configuration data
+            read:custom-field-contextual-configuration:jira: Read Jira custom field contextual configuration
+            read:screenable-field:jira: Read screenable fields
+            read:screen-field:jira: Read screen field information
+            read:issue-field-values:jira: Read issue field values
+            read:field.options:jira: Read field options
+            read:field-configuration-scheme:jira: Read field configuration scheme
+            read:field.option:jira: Read field option information
+            manage:jira-configuration: Manage Jira configuration
+
   schemas:
     Issue:
       type: object
@@ -39,7 +53,7 @@ components:
                 name:
                   type: string
 paths:
-  /search:
+  /3/search:
     get:
       operationId: getIssues
       summary: Retrieve a list of issues
@@ -59,6 +73,13 @@ paths:
           required: false
           schema:
             type: integer
+        - name: fields
+          in: query
+          required: false
+          description: Comma-separated list of fields to return (e.g., "summary,description")
+          schema:
+            type: string
+
       responses:
         '200':
           description: A list of issues
@@ -71,7 +92,7 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Issue'
-  /issue:
+  /3/issue:
     post:
       operationId: createIssue
       summary: Create a new issue
@@ -93,7 +114,17 @@ paths:
                     summary:
                       type: string
                     description:
-                      type: string
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum: ["doc"]
+                        version:
+                          type: integer
+                        content:
+                          type: array
+                          items:
+                            type: object
                     issuetype:
                       type: object
                       properties:
@@ -106,7 +137,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Issue'
-  /issue/{issueIdOrKey}:
+  /3/issue/{issueIdOrKey}:
     get:
       operationId: getIssue
       summary: Retrieve a specific issue
@@ -154,8 +185,370 @@ paths:
       responses:
         '204':
           description: Issue updated successfully
+  /3/project:
+    get:
+      operationId: getProjects
+      summary: Retrieve a list of all projects
+      description: Returns all projects visible to the currently authenticated user.
+      responses:
+        '200':
+          description: A list of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    key:
+                      type: string
+                    name:
+                      type: string
+                    projectTypeKey:
+                      type: string
+                    simplified:
+                      type: boolean
+                    avatarUrls:
+                      type: object
+                      additionalProperties:
+                        type: string
+                    self:
+                      type: string
+  /3/project/{projectIdOrKey}:
+    get:
+      operationId: getProject
+      summary: Retrieve a specific project's configuration
+      description: Returns detailed information for a single project, including issue types, lead, and configuration metadata.
+      parameters:
+        - name: projectIdOrKey
+          in: path
+          required: true
+          description: The ID or key of the project.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Project details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  key:
+                    type: string
+                  name:
+                    type: string
+                  projectTypeKey:
+                    type: string
+                  simplified:
+                    type: boolean
+                  style:
+                    type: string
+                  isPrivate:
+                    type: boolean
+                  avatarUrls:
+                    type: object
+                    additionalProperties:
+                      type: string
+                  issueTypes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        subtask:
+                          type: boolean
+                        hierarchyLevel:
+                          type: integer
+  /2/field:
+    get:
+      operationId: getFieldsV2
+      summary: Retrieve all fields (v2)
+      description: Returns all fields in the Jira instance, including schema, description, and field types. Often returns richer metadata than v3.
+      responses:
+        '200':
+          description: A list of all fields
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    key:
+                      type: string
+                    name:
+                      type: string
+                    description:
+                      type: string
+                    custom:
+                      type: boolean
+                    schema:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        custom:
+                          type: string
+                        customId:
+                          type: integer
+
+  /2/field/{fieldId}/context:
+    get:
+      operationId: getFieldContextsV2
+      summary: Retrieve field contexts (v2)
+      description: Returns the contexts associated with a custom field using the Jira v2 API.
+      parameters:
+        - name: fieldId
+          in: path
+          required: true
+          description: The ID of the custom field (e.g., customfield_10058)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contexts for the specified field
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contexts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        projectIds:
+                          type: array
+                          items:
+                            type: string
+                        issueTypeIds:
+                          type: array
+                          items:
+                            type: string
+
+  /2/field/search:
+    get:
+      operationId: searchFieldsV2
+      summary: Search fields (v2)
+      description: Paginated search for fields using the v2 Jira API. Supports filters like query, type, and custom status.
+      parameters:
+        - name: startAt
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: maxResults
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: query
+          in: query
+          required: false
+          description: Text to filter fields by name or ID
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          description: Filter by field type (e.g., "custom")
+          schema:
+            type: string
+        - name: isCustomField
+          in: query
+          required: false
+          description: Restrict results to custom fields
+          schema:
+            type: boolean
+        - name: id
+          in: query
+          required: false
+          description: Field ID (e.g., customfield_10058) to filter by specific field(s)
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: A paginated list of matching fields
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  maxResults:
+                    type: integer
+                  startAt:
+                    type: integer
+                  total:
+                    type: integer
+                  values:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        key:
+                          type: string
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        custom:
+                          type: boolean
+                        schema:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                            custom:
+                              type: string
+                            customId:
+                              type: integer
+
+  /3/field:
+    get:
+      operationId: getFields
+      summary: Retrieve all fields in the Jira instance
+      description: Returns all fields, including custom fields, with metadata including field ID, name, and type.
+      responses:
+        '200':
+          description: A list of all fields
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    key:
+                      type: string
+                    name:
+                      type: string
+                    custom:
+                      type: boolean
+                    schema:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        custom:
+                          type: string
+                        customId:
+                          type: integer
+
+  /3/field/search:
+    get:
+      operationId: searchFields
+      summary: Search Jira fields
+      description: Allows filtering fields by type, custom status, or partial match on name or ID.
+      parameters:
+        - name: startAt
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: maxResults
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: isCustomField
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Field ID (e.g. customfield_10058) to filter by specific field(s)
+        - name: expand
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Expand options for field metadata
+      responses:
+        '200':
+          description: A paged list of matching fields
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  values:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        key:
+                          type: string
+                        name:
+                          type: string
+                        custom:
+                          type: boolean
+                        schema:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                            custom:
+                              type: string
+                            customId:
+                              type: integer
+
 security:
   - OAuth2:
       - read:jira-user
       - read:jira-work
       - write:jira-work
+      - read:project:jira
+      - read:field:jira
+      - read:field-configuration:jira
+      - read:custom-field-contextual-configuration:jira
+
+      - read:screenable-field:jira
+      - read:screen-field:jira
+      - read:issue-field-values:jira
+      - read:field.options:jira
+      - read:field-configuration-scheme:jira
+      - read:field.option:jira
+      - manage:jira-configuration
+
+
+
+
